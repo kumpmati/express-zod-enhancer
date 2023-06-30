@@ -1,0 +1,11 @@
+# Node.js
+/node_modules
+
+# Build directory
+/dist
+
+# Development
+.env
+.env.local
+.DS_Store
+coverage/
