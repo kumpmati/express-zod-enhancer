@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { endpoint } from "../../lib/builder"
 
-export const healthEndpoint = endpoint<"/health">()
+export const healthEndpoint = endpoint<"/">()
   .meta({
     title: "Get health",
     description: "returns ok",
@@ -13,12 +13,12 @@ export const healthEndpoint = endpoint<"/health">()
   .handle((req, res) => res.status(200).json({ ok: true }))
   .build()
 
-export const healthPostEndpoint = endpoint<"/health/:b">()
+export const healthPostEndpoint = endpoint<"/:test">()
   .meta({ title: "Post Health", description: "does stuff but POST", tags: ["Health"] })
   .schema({
     body: z.object({ status: z.number().min(5).max(100) }),
     query: z.object({}),
-    params: z.object({ b: z.string() }),
+    params: z.object({ test: z.string() }),
     response: z.object({
       a: z.boolean(),
       helloWorldEndpoint: z.object({ version: z.string(), name: z.string() }),

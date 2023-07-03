@@ -172,6 +172,4 @@ export class EndpointBuilder<
   }
 }
 
-export const endpoint = <T extends string = "/">() => {
-  return new EndpointBuilder<T>()
-}
+export const endpoint = <T extends string = "/">() => new EndpointBuilder<T>()

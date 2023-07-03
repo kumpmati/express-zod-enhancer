@@ -34,9 +34,7 @@ export const createUser = endpoint<"/users/new">()
 export const getUsers = endpoint<"/users">()
   .meta({ title: "Get all", description: "Lists all users", tags: ["User"] })
   .response(z.array(userSchema))
-  .handle(async (req, res) => {
-    res.status(200).json({} as any)
-  })
+  .handle(async (_, res) => res.status(200).json(users))
   .build()
 
 export const deleteUser = endpoint<"/users/:id">()
