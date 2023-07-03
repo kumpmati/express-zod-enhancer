@@ -4,6 +4,7 @@ import { listAllRoutes } from "./traverser"
 import { zodToJsonSchema } from "zod-to-json-schema"
 import { z } from "zod"
 import { zodSchemaToOpenApiParams } from "./zod"
+import { createFixture } from "zod-fixture"
 
 /**
  * Given an express application, generates an OpenAPI specification from all endpoints built using the
@@ -20,10 +21,7 @@ export const generateSpec = (app: Express, info?: oas30.InfoObject) => {
   const routes = listAllRoutes(app)
 
   for (const route of routes) {
-    const item: oas30.PathItemObject = {
-      summary: "hello world!",
-      description: "moikka taas",
-    }
+    const item: oas30.PathItemObject = {}
 
     const op: oas30.OperationObject = {
       summary: route.info?.meta.title,
@@ -39,12 +37,14 @@ export const generateSpec = (app: Express, info?: oas30.InfoObject) => {
             content: {
               "application/json": {
                 schema: zodToJsonSchema(route.info?.bodySchema ?? z.any()) as any,
+                example: createFixture(route.info.bodySchema),
               },
             },
           }
         : undefined,
       responses: {
-        200: {
+        "200": {
+          description: route.info.meta.responseDescription,
           content: route.info.responseSchema
             ? {
                 "application/json": {
@@ -53,13 +53,13 @@ export const generateSpec = (app: Express, info?: oas30.InfoObject) => {
               }
             : undefined,
         },
-        400: {
+        "400": {
+          description: route.info.meta.errorDescription,
           content: {
             "application/json": {
               schema: zodToJsonSchema(z.object({ error: z.string() })),
             },
           },
-          description: "error",
         },
       },
     }

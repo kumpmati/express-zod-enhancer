@@ -15,8 +15,14 @@ export const handleAppError: ErrorRequestHandler = async (err, req, res, next) =
       process.exit(1)
     }
 
-    return res.status(err.statusCode).json({ error: err.message })
+    return res
+      .status(err.statusCode)
+      .setHeader("Content-Type", "application/json")
+      .end(JSON.stringify({ error: err.message }))
   }
 
-  return res.status(500).json({ error: err?.message ?? err })
+  return res
+    .status(500)
+    .setHeader("Content-Type", "application/json")
+    .end(JSON.stringify({ error: err.message ?? err }))
 }

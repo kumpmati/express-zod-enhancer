@@ -1,7 +1,12 @@
 import { ZodObject, ZodRawShape, ZodSchema, z } from "zod"
 import type { RequestHandler } from "express"
 import type { RouteParameters } from "express-serve-static-core"
-import { validateBody, validateParams, validateQuery } from "./middleware/validate"
+import {
+  validateBody,
+  validateParams,
+  validateQuery,
+  validateResponse,
+} from "./middleware/validate"
 import { EnhancedRequestHandler, RouteMetaSchema, RouteSchema } from "./types"
 
 /**
@@ -32,15 +37,17 @@ export class EndpointBuilder<
    *
    * You don't need to call this function, that is done automatically by the ApiBuilder.
    */
-  public build(): EnhancedRequestHandler<ReqBody, Query, ResBody, Params> {
+  public build(): [...RequestHandler[], EnhancedRequestHandler<ReqBody, Query, ResBody, Params>] {
     if (!this._handler) throw new Error("a route must have a handler function: ")
     if (!this._meta) throw new Error("a route must have meta info")
+    if (!this._responseSchema) throw new Error("a route must have a response schema")
 
     const middleware: RequestHandler[] = []
 
     if (this._bodySchema) middleware.push(validateBody(this._bodySchema))
     if (this._querySchema) middleware.push(validateQuery(this._querySchema))
     if (this._paramsSchema) middleware.push(validateParams(this._paramsSchema))
+    if (this._responseSchema) middleware.push(validateResponse(this._responseSchema))
 
     // add custom middleware after body and query middleware
     middleware.push(...this._middleware)
@@ -50,7 +57,7 @@ export class EndpointBuilder<
       bodySchema: this._bodySchema,
       querySchema: this._querySchema,
       paramsSchema: this._paramsSchema,
-      responseSchema: this._responseSchema, // TODO: not used right now, implement validation
+      responseSchema: this._responseSchema,
       middleware: middleware,
     }
 
@@ -59,7 +66,7 @@ export class EndpointBuilder<
     // save the info into the request handler
     handler.__zod_api = info
 
-    return handler
+    return [...middleware, handler]
   }
 
   /**
@@ -127,6 +134,19 @@ export class EndpointBuilder<
   ): Omit<EndpointBuilder<Path, ReqBody, Query, z.infer<typeof schema>, Params>, "response"> {
     this._responseSchema = schema
     return this as any
+  }
+
+  /**
+   * Shorthand to define all the schemas for the endpoint
+   * @param s
+   */
+  public schema<
+    B extends ZodRawShape,
+    Q extends ZodRawShape,
+    P extends RouteParameters<Path>,
+    R
+  >(s: { body: ZodObject<B>; query: ZodObject<Q>; params: ZodSchema<P>; response: ZodSchema<R> }) {
+    return this.body(s.body).query(s.query).response(s.response).params(s.params)
   }
 
   /**

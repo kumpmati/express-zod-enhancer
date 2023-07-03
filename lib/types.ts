@@ -15,6 +15,8 @@ export const routeMetaSchema = z.object({
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
   deprecated: z.boolean().optional(),
+  responseDescription: z.string().optional(),
+  errorDescription: z.string().optional(),
 })
 
 export type RouteMetaSchema = z.infer<typeof routeMetaSchema>
