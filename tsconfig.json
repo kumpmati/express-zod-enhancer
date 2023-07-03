@@ -11,6 +11,6 @@
     "skipLibCheck": true,
     "outDir": "dist"
   },
-  "include": ["src/**/*.d.ts", "src/**/*.ts"],
+  "include": ["src/**/*.d.ts", "src/**/*.ts", "lib/**/*.d.ts", "lib/**/*.ts"],
   "exclude": ["node_modules"]
 }
