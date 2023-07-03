@@ -1,11 +1,27 @@
+import { Router } from "express"
+import { endpoint } from "../../lib/builder"
 import { z } from "zod"
-import { ApiBuilder } from "../../lib"
 
-export const helloRouter = new ApiBuilder()
+export const helloRouter = Router()
 
-helloRouter.get("/:name").handle((req, res) => res.status(200).json({ hello1: req.params.name }))
+helloRouter.get(
+  "/",
+  endpoint()
+    .meta({ title: "hello with query params" })
+    .query(z.object({ name: z.string(), lastName: z.string().optional() }))
+    .response(z.object({ hello: z.string() }))
+    .handle((req, res) =>
+      res.status(200).json({ hello: req.query.name + req.query.lastName ?? "" })
+    )
+    .build()
+)
 
-helloRouter
-  .get("/")
-  .query(z.object({ name: z.string() }))
-  .handle((req, res) => res.status(200).json({ hello2: req.query.name }))
+helloRouter.get(
+  "/name/:num",
+  endpoint<"/name/:num">()
+    .meta({ title: "hello with name param", description: "does stuff" })
+    .params(z.object({ num: z.string() }))
+    .response(z.object({ world: z.string() }))
+    .handle((req, res) => res.status(200).json({ world: req.params.num }))
+    .build()
+)
