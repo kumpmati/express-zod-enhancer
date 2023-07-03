@@ -1,9 +1,8 @@
 import { ZodObject, ZodRawShape, ZodSchema, z } from "zod"
-import { ApiBuilder } from "."
 import type { RequestHandler } from "express"
 import type { RouteParameters } from "express-serve-static-core"
 
-type RouteMethod = "get" | "post" | "patch" | "update" | "delete" | "options"
+export type RouteMethod = "get" | "post" | "patch" | "put" | "update" | "delete" | "options"
 
 const routeMetaSchema = z.object({
   shortDescription: z.string(),
@@ -13,11 +12,11 @@ const routeMetaSchema = z.object({
 export type RouteMetaSchema = z.infer<typeof routeMetaSchema>
 
 const routeSchema = z.object({
-  path: z.string(),
   method: z
     .literal("get")
     .or(z.literal("post"))
     .or(z.literal("patch"))
+    .or(z.literal("put"))
     .or(z.literal("update"))
     .or(z.literal("delete"))
     .or(z.literal("options")),
@@ -32,36 +31,37 @@ const routeSchema = z.object({
 
 export type RouteSchema = z.infer<typeof routeSchema>
 
+/**
+ * Helper class to build a typesafe API endpoint.
+ */
 export class EndpointBuilder<
   Path extends string = any,
-  Body extends Record<string, any> = any,
-  Query extends Record<string, any> = any,
+  Body extends Record<string, any> = Record<string, never>,
+  Query extends Record<string, any> = Record<string, never>,
   Response = any
 > {
-  private api: ApiBuilder
-
-  private _path: string
   private _method?: RouteMethod
   private _meta?: RouteMetaSchema
   private _bodySchema?: ZodSchema
   private _querySchema?: ZodSchema
-  private _paramsSchema?: ZodSchema
   private _responseSchema?: ZodSchema
   private _middleware: RequestHandler[]
   private _handler?: RequestHandler<RouteParameters<Path>, any, Body, Query>
 
-  constructor(api: ApiBuilder, path: Path) {
-    this.api = api
-    this._path = path
+  constructor() {
     this._middleware = []
   }
 
+  /**
+   * Returns the final route object used when attaching to the ApiBuilder.
+   *
+   * You don't need to call this function, that is done automatically by the ApiBuilder.
+   */
   public getRouteObject(): RouteSchema {
     if (!this._handler) throw new Error("a route must have a handler function")
     if (!this._method) throw new Error("a route must have a method")
 
     return {
-      path: this._path,
       method: this._method,
       meta: this._meta,
       bodySchema: this._bodySchema,
@@ -73,13 +73,23 @@ export class EndpointBuilder<
   }
 
   /**
-   * Defines the method
+   * Defines the path of the endpoint.
+   * @param val
+   * @returns
+   */
+  // public path<T extends string>(val: T): Omit<EndpointBuilder<T, Body, Query, Response>, "path"> {
+  //   if (this._path) throw new Error("Warning: tried to assign path multiple times on an endpoint")
+
+  //   this._path = val
+  //   return this as any
+  // }
+
+  /**
+   * Defines the method for the endpoint
    * @param val
    * @returns
    */
   public method(val: RouteMethod): Omit<typeof this, "method"> {
-    if (this._method) throw new Error("an endpoint's method can only be defined once")
-
     this._method = val
     return this
   }

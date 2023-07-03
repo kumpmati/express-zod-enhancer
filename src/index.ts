@@ -1,11 +1,10 @@
-import express, { Router } from "express"
+import express from "express"
 import { Server } from "http"
 import { ENV } from "./config"
 import cors from "cors"
 import { handleAppError } from "./middleware/error"
 import { logger } from "./utils/logger"
-import { ApiBuilder } from "../lib"
-import { z } from "zod"
+import { v1 } from "./v1"
 
 /**
  * Starts the application
@@ -16,8 +15,6 @@ const start = async () => {
 
   app.use(express.json())
   app.use(cors({ origin: ["http://localhost:3000"] }))
-
-  const v1 = new ApiBuilder()
 
   /**
    * API routes
