@@ -75,7 +75,7 @@ export class EndpointBuilder<
    * @param val Metadata
    * @returns
    */
-  public meta(val: RouteMetaSchema): Omit<typeof this, "meta"> {
+  public meta(val: RouteMetaSchema): Omit<this, "meta"> {
     this._meta = val
     return this
   }
@@ -154,7 +154,7 @@ export class EndpointBuilder<
    * @param handler
    * @returns
    */
-  public use(...handlers: RequestHandler[]): Omit<typeof this, "use"> {
+  public use(...handlers: RequestHandler[]): Omit<this, "use"> {
     this._middleware.push(...handlers)
     return this
   }
@@ -164,9 +164,7 @@ export class EndpointBuilder<
    * @param handler
    * @returns
    */
-  public handle(
-    handler: RequestHandler<Params, ResBody, ReqBody, Query>
-  ): Omit<typeof this, "handle"> {
+  public handle(handler: RequestHandler<Params, ResBody, ReqBody, Query>): Omit<this, "handle"> {
     this._handler = handler
     return this
   }

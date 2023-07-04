@@ -1,8 +1,9 @@
 {
-  "name": "ts-express-boilerplate",
+  "name": "express-zod-enhancer",
   "version": "1.0.0",
-  "description": "Express application skeleton with TypeScript",
-  "main": "index.js",
+  "description": "Enhance your express routes using Zod schemas",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "keywords": [
     "express",
     "typescript",
@@ -17,7 +18,15 @@
     "coverage": "vitest run --coverage",
     "dev": "tsc-watch --onSuccess \"node dist/src\"",
     "format": "prettier --plugin-search-dir . --write .",
-    "lint": "prettier --plugin-search-dir . --check . && eslint ."
+    "lint": "prettier --plugin-search-dir . --check . && eslint .",
+    "package": "tsup lib/index.ts --format esm,cjs --clean --sourcemap --dts --out-dir dist"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
   },
   "devDependencies": {
     "@types/cors": "^2.8.13",
@@ -31,20 +40,19 @@
     "eslint-config-prettier": "^8.8.0",
     "prettier": "^2.5.1",
     "tsc-watch": "^4.6.0",
+    "tsup": "^7.1.0",
     "typescript": "^4.5.5",
     "vitest": "^0.30.1"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.0",
-    "express": "^4.17.2",
-    "express-list-endpoints": "^6.0.0",
     "openapi3-ts": "^4.1.2",
     "pino": "^8.11.0",
     "pino-pretty": "^10.0.0",
-    "redoc-express": "^2.1.0",
     "zod": "^3.21.4",
     "zod-fixture": "^1.10.0",
     "zod-to-json-schema": "^3.21.3"
+  },
+  "peerDependencies": {
+    "express": "^4.17.2"
   }
 }
