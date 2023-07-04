@@ -9,8 +9,10 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "skipLibCheck": true,
+    "declaration": true,
+    "sourceMap": true,
     "outDir": "dist"
   },
-  "include": ["src/**/*.d.ts", "src/**/*.ts", "lib/**/*.d.ts", "lib/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": ["lib/**/*.d.ts", "lib/**/*.ts"],
+  "exclude": ["node_modules", "dist", "*.spec.ts", "*.test.ts"]
 }
