@@ -1,12 +1,7 @@
 import { ZodObject, ZodRawShape, ZodSchema, z } from "zod"
 import type { RequestHandler } from "express"
 import type { RouteParameters } from "express-serve-static-core"
-import {
-  validateBody,
-  validateParams,
-  validateQuery,
-  validateResponse,
-} from "./middleware/validate"
+import { validateBody, validateParams, validateQuery } from "./middleware/validate"
 import { EnhancedRequestHandler, RouteMetaSchema, RouteSchema } from "./types"
 
 /**
@@ -40,14 +35,12 @@ export class EndpointBuilder<
   public build(): [...RequestHandler[], EnhancedRequestHandler<ReqBody, Query, ResBody, Params>] {
     if (!this._handler) throw new Error("a route must have a handler function: ")
     if (!this._meta) throw new Error("a route must have meta info")
-    if (!this._responseSchema) throw new Error("a route must have a response schema")
 
     const middleware: RequestHandler[] = []
 
     if (this._bodySchema) middleware.push(validateBody(this._bodySchema))
     if (this._querySchema) middleware.push(validateQuery(this._querySchema))
     if (this._paramsSchema) middleware.push(validateParams(this._paramsSchema))
-    if (this._responseSchema) middleware.push(validateResponse(this._responseSchema))
 
     // add custom middleware after body and query middleware
     middleware.push(...this._middleware)
@@ -78,6 +71,8 @@ export class EndpointBuilder<
   public meta(
     val: RouteMetaSchema
   ): Omit<EndpointBuilder<Path, ReqBody, Query, ResBody, Params>, "meta"> {
+    if (this._meta) throw new Error("cannot define route metadata multiple times")
+
     this._meta = val
     return this
   }
@@ -89,6 +84,8 @@ export class EndpointBuilder<
   public requestBody<T extends ZodRawShape>(
     schema: ZodObject<T>
   ): Omit<EndpointBuilder<Path, z.infer<typeof schema>, Query, ResBody, Params>, "body"> {
+    if (this._bodySchema) throw new Error("a route cannot have multiple request body schemas")
+
     this._bodySchema = schema
     return this as any
   }
@@ -100,6 +97,8 @@ export class EndpointBuilder<
   public query<T extends ZodRawShape>(
     schema: ZodObject<T>
   ): Omit<EndpointBuilder<Path, ReqBody, z.infer<typeof schema>, ResBody, Params>, "query"> {
+    if (this._querySchema) throw new Error("a route cannot have multiple query schemas")
+
     this._querySchema = schema
     return this as any
   }
@@ -122,6 +121,8 @@ export class EndpointBuilder<
     >,
     "params"
   > {
+    if (this._paramsSchema) throw new Error("a route cannot have multiple params schemas")
+
     this._paramsSchema = schema
     return this as any
   }
@@ -134,6 +135,8 @@ export class EndpointBuilder<
   public response<T>(
     schema: ZodSchema<T>
   ): Omit<EndpointBuilder<Path, ReqBody, Query, z.infer<typeof schema>, Params>, "response"> {
+    if (this._responseSchema) throw new Error("a route cannot have multiple response schemas")
+
     this._responseSchema = schema
     return this as any
   }
