@@ -13,7 +13,7 @@ import { createFixture } from "zod-fixture"
  * @param info
  * @returns
  */
-export const generateSpec = (app: Express, info?: oas30.InfoObject) => {
+export const generateDocumentation = (app: Express, info?: oas30.InfoObject) => {
   const doc = new oas30.OpenApiBuilder()
 
   doc.addInfo(info ?? { title: "API", version: "0.0.1" })

@@ -1,6 +1,6 @@
 {
   "name": "express-zod-enhancer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Enhance your express routes using Zod schemas",
   "homepage": "https://github.com/kumpmati/express-zod-enhancer",
   "main": "./dist/index.js",
