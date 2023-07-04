@@ -1,7 +1,12 @@
 import { ZodObject, ZodRawShape, ZodSchema, z } from "zod"
 import type { RequestHandler } from "express"
 import type { RouteParameters } from "express-serve-static-core"
-import { validateBody, validateParams, validateQuery } from "./middleware/validate"
+import {
+  validateBody,
+  validateParams,
+  validateQuery,
+  validateResponse,
+} from "./middleware/validate"
 import { EnhancedRequestHandler, RouteMetaSchema, RouteSchema } from "./types"
 
 /**
@@ -41,6 +46,7 @@ export class EndpointBuilder<
     if (this._bodySchema) middleware.push(validateBody(this._bodySchema))
     if (this._querySchema) middleware.push(validateQuery(this._querySchema))
     if (this._paramsSchema) middleware.push(validateParams(this._paramsSchema))
+    if (this._responseSchema) middleware.push(validateResponse(this._responseSchema))
 
     // add custom middleware after body and query middleware
     middleware.push(...this._middleware)
