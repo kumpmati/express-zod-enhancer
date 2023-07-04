@@ -75,7 +75,9 @@ export class EndpointBuilder<
    * @param val Metadata
    * @returns
    */
-  public meta(val: RouteMetaSchema): Omit<this, "meta"> {
+  public meta(
+    val: RouteMetaSchema
+  ): Omit<EndpointBuilder<Path, ReqBody, Query, ResBody, Params>, "meta"> {
     this._meta = val
     return this
   }
@@ -84,7 +86,7 @@ export class EndpointBuilder<
    * Defines the schema used to validate the request's body
    * @param schema Zod schema
    */
-  public body<T extends ZodRawShape>(
+  public requestBody<T extends ZodRawShape>(
     schema: ZodObject<T>
   ): Omit<EndpointBuilder<Path, z.infer<typeof schema>, Query, ResBody, Params>, "body"> {
     this._bodySchema = schema
@@ -145,8 +147,13 @@ export class EndpointBuilder<
     Q extends ZodRawShape,
     P extends RouteParameters<Path>,
     R
-  >(s: { body: ZodObject<B>; query: ZodObject<Q>; params: ZodSchema<P>; response: ZodSchema<R> }) {
-    return this.body(s.body).query(s.query).response(s.response).params(s.params)
+  >(s: {
+    requestBody: ZodObject<B>
+    query: ZodObject<Q>
+    params: ZodSchema<P>
+    response: ZodSchema<R>
+  }) {
+    return this.requestBody(s.requestBody).query(s.query).response(s.response).params(s.params)
   }
 
   /**
@@ -154,7 +161,9 @@ export class EndpointBuilder<
    * @param handler
    * @returns
    */
-  public use(...handlers: RequestHandler[]): Omit<this, "use"> {
+  public use(
+    ...handlers: RequestHandler[]
+  ): Omit<EndpointBuilder<Path, ReqBody, Query, ResBody, Params>, "use"> {
     this._middleware.push(...handlers)
     return this
   }
@@ -164,10 +173,33 @@ export class EndpointBuilder<
    * @param handler
    * @returns
    */
-  public handle(handler: RequestHandler<Params, ResBody, ReqBody, Query>): Omit<this, "handle"> {
+  public handle(
+    handler: RequestHandler<Params, ResBody, ReqBody, Query>
+  ): Omit<EndpointBuilder<Path, ReqBody, Query, ResBody, Params>, "handle"> {
+    if (this._handler) {
+      throw new Error(
+        "a route cannot have two handlers. Add middleware if you need to use handlers."
+      )
+    }
+
     this._handler = handler
     return this
   }
 }
 
-export const endpoint = <T extends string = "/">() => new EndpointBuilder<T>()
+/**
+ * Enhance an existing endpoint
+ */
+export const enhance = <
+  T extends string = "/",
+  ReqBody extends Record<string, any> = Record<string, never>,
+  ResBody = any,
+  Query extends Record<string, any> = Record<string, never>
+>(
+  handler?: RequestHandler<RouteParameters<T>, ResBody, ReqBody, Query>
+) => {
+  const builder = new EndpointBuilder<T, ReqBody, Query, ResBody, RouteParameters<T>>()
+  if (handler) builder.handle(handler)
+
+  return builder
+}
